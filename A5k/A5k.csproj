@@ -57,7 +57,9 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Shaders\1Vert\vertexShaderTex.c" />
     <Content Include="Shaders\1Vert\vertexShader.c" />
+    <Content Include="Shaders\5Frag\fragmentShaderTex.c" />
     <Content Include="Shaders\5Frag\fragmentShader.c" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
