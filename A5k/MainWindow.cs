@@ -19,11 +19,28 @@ namespace A5k
         private readonly string _title;
         private int _program;
         private int _program2;
-        private int _vertexArray;
+        //private int _vertexArray;
         private double _time;
         private int texture;
         uint VBO, VAO, EBO;
 
+
+        int shaderProgram;
+        /*
+        public struct Vertex
+        {
+            public const int Size = (4 + 4) * 4; // size of struct in bytes
+
+            private readonly Vector4 _position;
+            private readonly Color4 _color;
+
+            public Vertex(Vector4 position, Color4 color)
+            {
+                _position = position;
+                _color = color;
+            }
+        }
+        */
         public MainWindow()
             : base(640, // initial width
                 480, // initial height
@@ -48,57 +65,136 @@ namespace A5k
             CursorVisible = true;
             //GL.Disable()
 
+            
+            //_program = CreateProgram();
 
-            _program = CreateProgram();
-
-            //GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
+            GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
             //
             //
             //GL.PatchParameter(PatchParameterInt.PatchVertices, 6);
             //GL.GenVertexArrays(1, out _vertexArray);
+            
             float[] vertices = {
                  0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f, // top right
                  0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f, // bottom right
                 -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f, // bottom left
                 -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f  // top left 
             };
+            
+            /*
+            float[] vertices = {
+                 0.5f,  0.5f, 0.0f,  1.0f, 1.0f,            // top right
+                 0.5f, -0.5f, 0.0f,  1.0f, 0.0f,            // bottom right
+                -0.5f, -0.5f, 0.0f,  0.0f, 0.0f,            // bottom left
+                -0.5f,  0.5f, 0.0f,  0.0f, 1.0f             // top left 
+            };
+            */
+            //float[] vertices = {
+            //    -0.5f, -0.5f, 0.0f,
+            //     0.5f, -0.5f, 0.0f,
+            //     0.0f,  0.5f, 0.0f
+            //};
 
+
+            
             uint[] indices = {
-                0, 1, 3, // first triangle
+                3, 1, 0, // first triangle
                 1, 2, 3  // second triangle
             };
-
+            
 
             //int VBO, VAO, EBO;
             GL.GenVertexArrays(1, out VAO);
             GL.GenBuffers(1, out VBO);
             GL.GenBuffers(1, out EBO);
 
+            //GL.BindBuffer(BufferTarget.ElementArrayBuffer, EBO);
+            //GL.BufferData(BufferTarget.ElementArrayBuffer, indices.Length, indices, BufferUsageHint.StaticDraw);
+
             GL.BindVertexArray(VAO);
 
             GL.BindBuffer(BufferTarget.ArrayBuffer, VBO);
-            GL.BufferData(BufferTarget.ArrayBuffer, vertices.Length, vertices, BufferUsageHint.StaticDraw);
+            GL.NamedBufferStorage(
+                       VBO,
+                       sizeof(float) * vertices.Length,      
+                       vertices,                           
+                       BufferStorageFlags.MapWriteBit);
 
             GL.BindBuffer(BufferTarget.ElementArrayBuffer, EBO);
-            GL.BufferData(BufferTarget.ElementArrayBuffer, indices.Length, indices, BufferUsageHint.StaticDraw);
+            GL.NamedBufferStorage(
+                       EBO,
+                       sizeof(uint) * indices.Length,
+                       indices,
+                       BufferStorageFlags.MapWriteBit);
+
+
+
+
+            //GL.VertexArrayAttribBinding(VAO, 0, 0);
+
+            /*
+            GL.EnableVertexArrayAttrib(VAO, 0);
+
+
+            GL.VertexArrayAttribFormat(
+                VAO,
+                0,                      // attribute index, from the shader location = 0
+                3,                      // size of attribute, vec4
+                VertexAttribType.Float, // contains floats
+                false,                  // does not need to be normalized as it is already, floats ignore this flag anyway
+                0);
+           */
+            /*
+            GL.VertexArrayAttribBinding(VAO, 1, 0);
+            GL.EnableVertexArrayAttrib(VAO, 1);
+            GL.VertexArrayAttribFormat(
+                VAO,
+                1,                      // attribute index, from the shader location = 1
+                4,                      // size of attribute, vec4
+                VertexAttribType.Float, // contains floats
+                false,                  // does not need to be normalized as it is already, floats ignore this flag anyway
+                16);                     // relative offset after a vec4
+
+            GL.VertexArrayVertexBuffer(VAO, 0, VBO, IntPtr.Zero, (4+4)*4);
+            */
+
+            //GL.BufferData(BufferTarget.ArrayBuffer, vertices.Length, vertices, BufferUsageHint.StaticDraw);
+
+
+
+
+            int vShader = CompileShader(ShaderType.VertexShader, @"Shaders\1Vert\vertexShaderTex.c");
+            int fShader = CompileShader(ShaderType.FragmentShader, @"Shaders\5Frag\fragmentShaderTex.c");
+
+            shaderProgram = GL.CreateProgram();
+            GL.AttachShader(shaderProgram, vShader);
+            GL.AttachShader(shaderProgram, fShader);
+            GL.LinkProgram(shaderProgram);
+
+            GL.DeleteShader(vShader);
+            GL.DeleteShader(fShader);
 
 
             // position attribute
             GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 8 * sizeof(float), 0);
             GL.EnableVertexAttribArray(0);
+
+            
             // color attribute
             GL.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, 8 * sizeof(float), (3 * sizeof(float)));
             GL.EnableVertexAttribArray(1);
             // texture coord attribute
             GL.VertexAttribPointer(2, 2, VertexAttribPointerType.Float, false, 8 * sizeof(float), (6 * sizeof(float)));
             GL.EnableVertexAttribArray(2);
+            
 
+            /*
             texture = LoadTexture("PNG\\playerShip1_red.png");
 
             GL.UseProgram(_program);
 
             GL.Uniform1(GL.GetUniformLocation(_program, "ourTexture"), 0);
-
+            */
             //System.Diagnostics.Debug.WriteLine(GL.GetUniformLocation(_program, "texture1"));
 
 
@@ -117,7 +213,7 @@ namespace A5k
         public override void Exit()
         {
             Debug.WriteLine("Exit called");
-            GL.DeleteVertexArrays(1, ref _vertexArray);
+            GL.DeleteVertexArrays(1, ref VAO);
             GL.DeleteProgram(_program);
             base.Exit();
         }
@@ -139,8 +235,8 @@ namespace A5k
             bitmap.UnlockBits(data);
 
 
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
+            //GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
+            //GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
 
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
@@ -162,7 +258,7 @@ namespace A5k
             {
                 var program = GL.CreateProgram();
                 var shaders = new List<int>();
-                shaders.Add(CompileShader(ShaderType.VertexShader, @"Shaders\1Vert\vertexShaderTex.c"));
+                shaders.Add(CompileShader(ShaderType.VertexShader, @"Shaders\1Vert\vertexShader.c"));
                 shaders.Add(CompileShader(ShaderType.FragmentShader, @"Shaders\5Frag\fragmentShaderTex.c"));
 
                 foreach (var shader in shaders)
@@ -224,6 +320,15 @@ namespace A5k
             GL.ClearColor(backColor);
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
+            GL.UseProgram(shaderProgram);
+            GL.BindVertexArray(VAO);
+
+
+            GL.BindBuffer(BufferTarget.ElementArrayBuffer, EBO);
+            GL.DrawElements(PrimitiveType.Triangles, 6, DrawElementsType.UnsignedInt, 0);
+            //GL.DrawArrays(PrimitiveType.Triangles, 0, 3);
+
+            /*
             GL.ActiveTexture(TextureUnit.Texture0);
             GL.BindTexture(TextureTarget.Texture2D, texture);
 
@@ -232,7 +337,7 @@ namespace A5k
 
             GL.BindVertexArray(VAO);
             GL.DrawElements(BeginMode.Triangles, 6, DrawElementsType.UnsignedInt, 0);
-
+            */
             // add shader attributes here
             //  GL.VertexAttrib1(0, _time);
             //  
