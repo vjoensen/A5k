@@ -12,7 +12,9 @@ namespace A5k
         [STAThread]
         static void Main(string[] args)
         {
+            
             new MainWindow().Run(60);
         }
+
     }
 }
