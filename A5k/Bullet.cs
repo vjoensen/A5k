@@ -16,21 +16,22 @@ namespace A5k
 
         private float xVel, yVel;
 
-        private float speed = 20;
+        private float speed = 5;
 
         private Texture2D texture;
-        //float radius = 9;
-        float radius = 9;
+        
+        float duration = 120;
         
 
-        public Bullet(float spawnPosX, float spawnPosY, float spawnRotation, Texture2D shipTexture)
+        public Bullet(float spawnPosX, float spawnPosY, float spawnRotation, Texture2D shipTexture, Faction fac)
         {
             pos = new Vector2(spawnPosX, spawnPosY);
             rotation = spawnRotation;
             xVel = (float)Math.Cos(spawnRotation)*speed;
             yVel = (float)Math.Sin(spawnRotation)*speed;
             texture = shipTexture;
-
+            faction = fac;
+            
         }
 
         override public void Update(List<SpaceObject> newObjects)
@@ -40,7 +41,8 @@ namespace A5k
          */
             pos.X += xVel;
             pos.Y += yVel;
-
+            duration--;
+            if (duration < 0) isdead = true;
             //rotation = ??
 
         }
@@ -50,6 +52,15 @@ namespace A5k
             SpriteDrawer.Draw(texture, pos, Vector2.One, Color.Azure, new Vector2(((float)texture.Width) / 2, ((float)texture.Height) / 2), rotation - (float)Math.PI / 2);
         }
 
+        public override void Collide(SpaceObject collider)
+        {
+            collider.TakeDamage(20, this);
+            isdead = true;
+        }
 
+        public override void TakeDamage(float damage, SpaceObject source)
+        {
+            isdead = true;
+        }
     }
 }

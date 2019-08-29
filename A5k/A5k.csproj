@@ -47,6 +47,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AI.cs" />
     <Compile Include="Input.cs" />
     <Compile Include="MainWindow.cs" />
     <Compile Include="Program.cs" />
@@ -59,6 +60,7 @@
     <Compile Include="Spritebatch.cs" />
     <Compile Include="Texture2D.cs" />
     <Compile Include="View.cs" />
+    <Compile Include="Weapon.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -66,9 +68,11 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Shaders\1Vert\vertexShaderTex - Copy.c" />
     <Content Include="Shaders\1Vert\vertexShaderTex.c" />
     <Content Include="Shaders\1Vert\vertexShader.c" />
     <Content Include="Shaders\5Frag\fragmentShaderCol.c" />
+    <Content Include="Shaders\5Frag\fragmentShaderShield.c" />
     <Content Include="Shaders\5Frag\fragmentShaderTex.c" />
     <Content Include="Shaders\5Frag\fragmentShader.c" />
   </ItemGroup>

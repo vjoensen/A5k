@@ -19,13 +19,14 @@ namespace A5k
         private float maxSpeed;
         private float acceleration;
         private Texture2D texture;
+        
 
-        private float radius;
 
-
-        private int shootCD = 10;
-        private int currentShootCD = 10;
+        //private int shootCD = 10;
+        //private int currentShootCD = 10;
         Texture2D bulletTexture;
+
+        List<Weapon> weapons;
 
         View view;
 
@@ -33,6 +34,7 @@ namespace A5k
 
         public PlayerShip(float spawnPosX, float spawnPosY, float spawnRotation, Texture2D shipTexture, Texture2D bulletTexture, View view)
         {
+            faction = Faction.Team1;
             pos = new Vector2(spawnPosX, spawnPosY);
             rotation = spawnRotation;
             xVel = 0;
@@ -43,7 +45,11 @@ namespace A5k
             this.bulletTexture = bulletTexture;
             this.view = view;
 
-            radius = Math.Max(shipTexture.Height, shipTexture.Width);
+            radius = Math.Max(shipTexture.Height, shipTexture.Width)/2;
+
+            weapons = new List<Weapon>();
+            weapons.Add(new Weapon(this, -20,15 , 0, SpriteDrawer.LoadTexture("PNG\\Parts\\gun09.png", false,false), SpriteDrawer.LoadTexture("PNG\\Lasers\\laserBlue01.png",true, false),2,20));
+
         }
 
         override public void Update(List<SpaceObject> newObjects)
@@ -84,25 +90,39 @@ namespace A5k
             rotation = (float)Math.Atan2(Input.mousePosition.Y + view.getY() - this.pos.Y, Input.mousePosition.X + view.getX() - this.pos.X) ;
             view.SetPosition(pos);
 
-            if(shootCD > 0)
+            if (Input.KeyDown(OpenTK.Input.Key.Space))
             {
-                shootCD--;
-            }
 
-            if (Input.KeyDown(OpenTK.Input.Key.Space) && shootCD == 0)
+                foreach(Weapon wep in weapons)
+                {
+                    wep.Shoot(newObjects);
+                }
+            }
+            foreach (Weapon wep in weapons)
             {
-                Bullet newShot = new Bullet(this.pos.X, this.pos.Y, this.rotation, bulletTexture);
-                newObjects.Add(newShot);
-                shootCD = currentShootCD;
+                wep.Update(newObjects);
             }
-
 
         }
 
         override public void Draw()
         {
-            SpriteDrawer.Draw(texture, pos, Vector2.One, Color.Azure, new Vector2(((float)texture.Width) / 2, ((float)texture.Height) / 2), rotation - (float)Math.PI / 2);
+            foreach (Weapon wep in weapons)
+            {
+                wep.Draw();
+            }
+            SpriteDrawer.Draw(texture, pos, Vector2.One, Color.White, new Vector2(((float)texture.Width) / 2, ((float)texture.Height) / 2), rotation - (float)Math.PI / 2);
+            
         }
 
+        public override void TakeDamage(float damage, SpaceObject source)
+        {
+            //throw new NotImplementedException();
+        }
+
+        public override void Collide(SpaceObject collider)
+        {
+            //throw new NotImplementedException();
+        }
     }
 }

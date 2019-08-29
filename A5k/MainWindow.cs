@@ -33,6 +33,8 @@ namespace A5k
         private PlayerShip player;
         private List<SpaceObject> spaceObjects;
 
+        private AI enemyAI;
+
 
 
         public MainWindow()
@@ -80,12 +82,18 @@ namespace A5k
             spritedrawer = new SpriteDrawer(view);
 
 
-            texture = LoadTexture("PNG\\playerShip1_red.png");
-            cursorTexture = LoadTexture("PNG\\crosshair010.png");
+            texture = SpriteDrawer.LoadTexture("PNG\\playerShip1_red.png", true, false);
+            cursorTexture = SpriteDrawer.LoadTexture("PNG\\crosshair010.png", true, false);
 
 
-            player = new PlayerShip(0, 0, 0, texture, LoadTexture("PNG\\Lasers\\laserBlue01.png"),  view);
-            spaceObjects.Add(new Ship(200, 200, 0, LoadTexture("PNG\\ufoBlue.png")));
+            
+
+            player = new PlayerShip(0, 0, 0, texture, SpriteDrawer.LoadTexture("PNG\\Lasers\\laserBlue01.png", true, false),  view);
+            enemyAI = new AI(spaceObjects, player);
+            Ship enemy1 = new Ship(200, 200, 0, SpriteDrawer.LoadTexture("PNG\\ufoBlue.png", true, false));
+
+            enemyAI.takeControl(enemy1);
+            spaceObjects.Add(enemy1);
 
 
             Closed += OnClosed;
@@ -102,36 +110,6 @@ namespace A5k
             base.Exit();
         }
 
-        private Texture2D LoadTexture(string file)
-        {
-            Bitmap bitmap = new Bitmap(file);
-
-            bitmap.RotateFlip(RotateFlipType.RotateNoneFlipY);
-            int tex;
-            GL.Hint(HintTarget.PerspectiveCorrectionHint, HintMode.Nicest);
-
-            GL.GenTextures(1, out tex);
-            GL.BindTexture(TextureTarget.Texture2D, tex);
-
-            System.Drawing.Imaging.BitmapData data = bitmap.LockBits(new System.Drawing.Rectangle(0, 0, bitmap.Width, bitmap.Height),
-                System.Drawing.Imaging.ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-
-            GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, data.Width, data.Height, 0, PixelFormat.Bgra, PixelType.UnsignedByte, data.Scan0);
-            bitmap.UnlockBits(data);
-
-
-            //GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
-            //GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
-
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
-
-            //GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.Repeat);
-            //GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.Repeat);
-
-            return new Texture2D(tex, bitmap.Width, bitmap.Height);
-        }
-
 
         protected override void OnUpdateFrame(FrameEventArgs e)
         {
@@ -140,13 +118,24 @@ namespace A5k
 
             mousePos.X = this.PointToClient(new Point(Mouse.GetCursorState().X, Mouse.GetCursorState().Y)).X-this.Width/2;
             mousePos.Y = -this.PointToClient(new Point(Mouse.GetCursorState().X, Mouse.GetCursorState().Y)).Y+this.Height/2;
+
+            for(int i = spaceObjects.Count-1; i>=0; i--)
+            {
+                if (spaceObjects[i].isDead())
+                {
+                    spaceObjects.RemoveAt(i);
+                }
+            }
+
+            enemyAI.Update();
+
             List<SpaceObject> newSO = new List<SpaceObject>();
             player.Update(newSO);
             foreach (SpaceObject so in spaceObjects)
             {
                 so.Update(newSO);
             }
-
+            CheckCollisions();
             spaceObjects.AddRange(newSO);
             view.Update();
         }
@@ -175,12 +164,32 @@ namespace A5k
 
         private void CheckCollisions()
         {
-
+            
+            for(int i = 0; i<spaceObjects.Count; i++)
+            {
+                for(int j = i+1; j < spaceObjects.Count; j++)
+                {
+                    if (i!=j && spaceObjects[i].getFaction() != spaceObjects[j].getFaction() && checkCol(spaceObjects[i], spaceObjects[j]) )
+                    {
+                         
+                        spaceObjects[i].Collide(spaceObjects[j]);
+                        spaceObjects[j].Collide(spaceObjects[i]);
+                    }
+                }
+            }
         }
         
         private bool checkCol(SpaceObject objA, SpaceObject objB)
         {
+            /*
+            if( DateTime.Now.Second%10 == 0)
+            {
+                Console.WriteLine("Collision" + objA.getFaction() + objB.getFaction());
+                Console.WriteLine(" A: (" + objA.pos.X + "," + objA.pos.Y + ") r: " + objA.getRadius());
+                Console.WriteLine(" B: (" + objB.pos.X + "," + objB.pos.Y + ") r: " + objB.getRadius());
 
+            }
+            */
             return (objA.pos.X - objB.pos.X) * (objA.pos.X - objB.pos.X) + (objA.pos.Y - objB.pos.Y) * (objA.pos.Y - objB.pos.Y) 
                     < (objA.getRadius() + objB.getRadius()) * (objA.getRadius() + objB.getRadius());
         }
