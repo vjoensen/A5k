@@ -7,16 +7,21 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using A5k.UI;
+
+//using Noesis;
+//using Noesis;
 using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Input;
-/*
-using Gwen;
-using Gwen.Renderer;
-using Gwen.Control;
-*/
+
+using A5k.UI;
+
+
+
+
+
+
 namespace A5k
 {
     public sealed class MainWindow : GameWindow
@@ -40,14 +45,13 @@ namespace A5k
 
         private AI enemyAI;
         Inventory inventory;
-        private bool inventoryOpen = true;
+        private bool inventoryOpen = false;
 
-        /*
-        //Gwen UI
-        private Gwen.Renderer.OpenTK m_renderer;
-        private Gwen.Skin.Base m_Skin;
-        private Canvas m_Canvas;
-        */
+
+        //Noesis UI
+        private Noesis.View nView;
+        private Noesis.Renderer renderer;
+
         public MainWindow()
             : base(640, // initial width
                 480, // initial height
@@ -78,6 +82,59 @@ namespace A5k
 
         protected override void OnLoad(EventArgs e)
         {
+
+            Noesis.GUI.Init();
+            //EmbeddedXaml[] xamls = new EmbeddedXaml[]
+            //{
+            //        new EmbeddedXaml { filename = "Reflections.xaml", resource = "Reflections" }
+            //};
+            //Noesis.GUI.SetXamlProvider(new LocalXamlProvider("."));
+
+
+
+            // Data loading
+            Noesis.Grid xaml = (Noesis.Grid)Noesis.GUI.ParseXaml(@"
+                <Grid xmlns=""http://schemas.microsoft.com/winfx/2006/xaml/presentation"">
+                    <Grid.Background>
+                        <LinearGradientBrush StartPoint=""0,0"" EndPoint=""0,1"">
+                            <GradientStop Offset=""0"" Color=""#FF123F61""/>
+                            <GradientStop Offset=""0.6"" Color=""#FF0E4B79""/>
+                            <GradientStop Offset=""0.7"" Color=""#FF106097""/>
+                        </LinearGradientBrush>
+                    </Grid.Background>
+                    <Viewbox>
+                        <StackPanel Margin=""50"">
+                            <Button Content=""Hello World!"" Margin=""0,30,0,0""/>
+                            <Rectangle Height=""5"" Margin=""-10,20,-10,0"">
+                                <Rectangle.Fill>
+                                    <RadialGradientBrush>
+                                        <GradientStop Offset=""0"" Color=""#40000000""/>
+                                        <GradientStop Offset=""1"" Color=""#00000000""/>
+                                    </RadialGradientBrush>
+                                </Rectangle.Fill>
+                            </Rectangle>
+                        </StackPanel>
+                    </Viewbox>
+                </Grid>");
+            // get content
+            var content = (Noesis.Grid)Noesis.GUI.LoadXaml("Reflections.xaml");
+
+            // create view
+            nView = Noesis.GUI.CreateView(xaml);
+            nView.SetSize(640, 480);
+            // get OpenGL rendering device
+            Noesis.RenderDevice device = new Noesis.RenderDeviceGL();
+
+            // init renderer as OpenGL
+            renderer = nView.Renderer;
+            renderer.Init(device);
+
+
+
+
+            nView.Update(0.001); // Ensures view is updated before first render call (avoids crash)
+
+
             CursorVisible = true;
 
             mousePos = new Vector2(this.PointToClient(new Point(Mouse.GetCursorState().X, Mouse.GetCursorState().Y)).X, this.PointToClient(new Point(Mouse.GetCursorState().X, Mouse.GetCursorState().Y)).Y);
@@ -94,12 +151,9 @@ namespace A5k
             spritedrawer = new SpriteDrawer(view);
             cursorTexture = SpriteDrawer.LoadTexture("PNG\\crosshair010.png", true, false);
 
-            /*
-            m_renderer = new Gwen.Renderer.OpenTK();
-            m_Skin = new Gwen.Skin.TexturedBase(m_renderer, "PNG\\UI\\GwenSkins\\DefaultSkin.png");
-            m_Skin.DefaultFont = new Gwen.Font(m_renderer, "Arial", 11);
-            m_Canvas = new Canvas(m_Skin);
-            */
+            
+
+            
 
             texture = SpriteDrawer.LoadTexture("PNG\\playerShip1_red.png", true, false);
             
@@ -111,15 +165,17 @@ namespace A5k
             spaceObjects.Add(enemy1);
 
 
-
-
             Closed += OnClosed;
         }
         private void OnClosed(object sender, EventArgs eventArgs)
         {
             Exit();
         }
-
+        protected override void OnUnload(EventArgs e)
+        {
+            renderer.Shutdown();
+            Noesis.GUI.Shutdown();
+        }
         public override void Exit()
         {
             Debug.WriteLine("Exit called");
@@ -224,7 +280,12 @@ namespace A5k
             GL.ClearColor(backColor);
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
+            renderer.UpdateRenderTree();
 
+            if (renderer.NeedsOffscreen())
+                renderer.RenderOffscreen();
+
+            renderer.Render();
 
             //SpriteDrawer.Draw(texture, Vector2.Zero, Vector2.One, Color.Azure, new Vector2(((float)texture.Width)/2, ((float)texture.Height)/2));
             if (inventoryOpen)
@@ -240,6 +301,28 @@ namespace A5k
                 player.Draw();
                 SpriteDrawer.DrawCursor(cursorTexture, mousePos, Vector2.One, Color.Azure, new Vector2(((float)cursorTexture.Width) / 2, ((float)cursorTexture.Height) / 2));
             }
+
+
+            /*
+            GL.Enable(EnableCap.DepthTest);
+            GL.DepthFunc(DepthFunction.Lequal);
+            GL.ClearDepth(1.0f);
+            GL.DepthMask(true);
+            GL.Disable(EnableCap.CullFace);
+            //GL.Disable(EnableCap.Alp AlphaTest);
+            GL.Disable(EnableCap.StencilTest);
+            GL.Disable(EnableCap.Blend);
+            GL.Disable(EnableCap.ScissorTest);
+
+            GL.UseProgram(0);
+            GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
+            GL.Viewport(0, 0, Width, Height);
+            GL.ColorMask(true, true, true, true);
+
+            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+
+            */
+
 
             /*
             m_Canvas.RenderCanvas();
