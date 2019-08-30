@@ -7,11 +7,16 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using A5k.UI;
 using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Input;
-
+/*
+using Gwen;
+using Gwen.Renderer;
+using Gwen.Control;
+*/
 namespace A5k
 {
     public sealed class MainWindow : GameWindow
@@ -26,7 +31,7 @@ namespace A5k
         //uint VBO, VAO, EBO;
         Vector2 mousePos;
         View view;
-        Spritebatch spritebatch;
+        
 
         private SpriteDrawer spritedrawer;
 
@@ -34,9 +39,15 @@ namespace A5k
         private List<SpaceObject> spaceObjects;
 
         private AI enemyAI;
+        Inventory inventory;
+        private bool inventoryOpen = true;
 
-
-
+        /*
+        //Gwen UI
+        private Gwen.Renderer.OpenTK m_renderer;
+        private Gwen.Skin.Base m_Skin;
+        private Canvas m_Canvas;
+        */
         public MainWindow()
             : base(640, // initial width
                 480, // initial height
@@ -51,10 +62,11 @@ namespace A5k
             _title += ": OpenGL Version: " + GL.GetString(StringName.Version);
             Input.Initialize(this);
 
-
+            
             spaceObjects = new List<SpaceObject>();
             view = new View(Vector2.Zero,new Vector2(640, 480), 2f, 0.0f);
-            
+            inventory = new Inventory(view);
+
         }
 
         protected override void OnResize(EventArgs e)
@@ -77,23 +89,28 @@ namespace A5k
 
             GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
             //
-            spritebatch = new Spritebatch(view);
+            //spritebatch = new Spritebatch(view);
 
             spritedrawer = new SpriteDrawer(view);
-
-
-            texture = SpriteDrawer.LoadTexture("PNG\\playerShip1_red.png", true, false);
             cursorTexture = SpriteDrawer.LoadTexture("PNG\\crosshair010.png", true, false);
 
+            /*
+            m_renderer = new Gwen.Renderer.OpenTK();
+            m_Skin = new Gwen.Skin.TexturedBase(m_renderer, "PNG\\UI\\GwenSkins\\DefaultSkin.png");
+            m_Skin.DefaultFont = new Gwen.Font(m_renderer, "Arial", 11);
+            m_Canvas = new Canvas(m_Skin);
+            */
 
+            texture = SpriteDrawer.LoadTexture("PNG\\playerShip1_red.png", true, false);
             
-
             player = new PlayerShip(0, 0, 0, texture, SpriteDrawer.LoadTexture("PNG\\Lasers\\laserBlue01.png", true, false),  view);
             enemyAI = new AI(spaceObjects, player);
             Ship enemy1 = new Ship(200, 200, 0, SpriteDrawer.LoadTexture("PNG\\ufoBlue.png", true, false));
 
             enemyAI.takeControl(enemy1);
             spaceObjects.Add(enemy1);
+
+
 
 
             Closed += OnClosed;
@@ -146,7 +163,7 @@ namespace A5k
         {
             var keyState = Keyboard.GetState();
 
-            if (keyState.IsKeyDown(Key.Escape))
+            if (keyState.IsKeyDown(OpenTK.Input.Key.Escape))
             {
                 Exit();
             }
@@ -208,15 +225,25 @@ namespace A5k
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
 
-            
+
             //SpriteDrawer.Draw(texture, Vector2.Zero, Vector2.One, Color.Azure, new Vector2(((float)texture.Width)/2, ((float)texture.Height)/2));
-            foreach(SpaceObject so in spaceObjects)
+            if (inventoryOpen)
             {
-                so.Draw();
+                inventory.Draw();
+            }
+            else
+            {
+                foreach (SpaceObject so in spaceObjects)
+                {
+                    so.Draw();
+                }
+                player.Draw();
+                SpriteDrawer.DrawCursor(cursorTexture, mousePos, Vector2.One, Color.Azure, new Vector2(((float)cursorTexture.Width) / 2, ((float)cursorTexture.Height) / 2));
             }
 
-            player.Draw();
-            SpriteDrawer.DrawCursor(cursorTexture, mousePos, Vector2.One, Color.Azure, new Vector2(((float)cursorTexture.Width) / 2, ((float)cursorTexture.Height) / 2));
+            /*
+            m_Canvas.RenderCanvas();
+            */
 
             SwapBuffers();
         }

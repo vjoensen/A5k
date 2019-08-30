@@ -221,7 +221,34 @@ namespace A5k
 
         }
 
-        
+        public static void DrawUI(Texture2D texture, Vector2 position, Vector2 scale, Color color, Vector2 origin, float rotation)
+        {
+            GL.UseProgram(shaderProgram);
+            int colorLoc = GL.GetUniformLocation(shaderProgram, "spriteColor");
+
+            int transformLoc = GL.GetUniformLocation(shaderProgram, "transform");
+
+            Matrix4 t = Matrix4.Identity;
+            //t = Matrix4.Mult(t, Matrix4.CreateScale(texture.Width, texture.Height, 1.0f));
+            //t = Matrix4.Mult(t, Matrix4.CreateTranslation(-origin.X, -origin.Y, 0));
+            t = Matrix4.Mult(t, Matrix4.CreateRotationZ((float)rotation));
+            t = Matrix4.Mult(t, Matrix4.CreateScale(scale.X, scale.Y, 1));
+            t = Matrix4.Mult(t, Matrix4.CreateTranslation(position.X, position.Y, 0));
+            t = Matrix4.Mult(t, Matrix4.CreateScale(2f / view.viewSize.X, 2f / view.viewSize.Y, 0));
+            //t = Matrix4.Mult(t, view.ApplyTransforms());
+            GL.UniformMatrix4(transformLoc, false, ref t);
+
+            GL.UseProgram(shaderProgram);
+            GL.Uniform3(colorLoc, (float)color.R / 255, (float)color.G / 255, (float)color.B / 255);
+            GL.BindVertexArray(VAO);
+
+            GL.ActiveTexture(TextureUnit.Texture0);
+            GL.BindTexture(TextureTarget.Texture2D, texture.ID);
+
+            GL.DrawElements(PrimitiveType.Triangles, 6, DrawElementsType.UnsignedInt, 0);
+
+        }
+
         public static Texture2D LoadTexture(string file, bool flipY, bool flipX)
         {
             Bitmap bitmap = new Bitmap(file);

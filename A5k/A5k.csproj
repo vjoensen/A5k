@@ -12,6 +12,8 @@
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -49,6 +51,7 @@
   <ItemGroup>
     <Compile Include="AI.cs" />
     <Compile Include="Input.cs" />
+    <Compile Include="Item.cs" />
     <Compile Include="MainWindow.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -57,10 +60,11 @@
     <Compile Include="Ship.cs" />
     <Compile Include="SpaceObject.cs" />
     <Compile Include="SpriteDrawer.cs" />
-    <Compile Include="Spritebatch.cs" />
     <Compile Include="Texture2D.cs" />
+    <Compile Include="UI\Inventory.cs" />
+    <Compile Include="UI\UIElement.cs" />
     <Compile Include="View.cs" />
-    <Compile Include="Weapon.cs" />
+    <Compile Include="Weapons\Weapon.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -75,6 +79,9 @@
     <Content Include="Shaders\5Frag\fragmentShaderShield.c" />
     <Content Include="Shaders\5Frag\fragmentShaderTex.c" />
     <Content Include="Shaders\5Frag\fragmentShader.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="SpriteSheets\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

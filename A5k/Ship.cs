@@ -37,7 +37,8 @@ namespace A5k
             texture = shipTexture;
             radius = Math.Max(shipTexture.Height, shipTexture.Width)/2;
             faction = Faction.Team2;
-            weapon = new Weapon(this, -20, 15, 0, new Texture2D(0,0,0), SpriteDrawer.LoadTexture("PNG\\Lasers\\laserRed01.png", true, false), 2, 20);
+            weapon = new Weapon(this, 0, 0, 0, new Texture2D(0,0,0), SpriteDrawer.LoadTexture("PNG\\Lasers\\laserRed01.png", true, false), 0, 0);
+            weapon.setAttackSpeed(.2f);
         }
 
         override public void Update(List<SpaceObject> newObjects)
@@ -48,10 +49,14 @@ namespace A5k
 
             if(target != null)
             {
-                float maxRange = 150;
+                float maxRange = 300;
                 if(Vector2.DistanceSquared(this.pos, target.pos) < maxRange*maxRange)
                 {
-                    weapon.Shoot(newObjects);
+                    weapon.ShootDirection(newObjects, (float)Math.Atan2(target.pos.Y - this.pos.Y, target.pos.X - this.pos.X));
+                }
+                else
+                {
+
                 }
 
 

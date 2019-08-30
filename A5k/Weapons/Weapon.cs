@@ -44,17 +44,34 @@ namespace A5k
             
         }
 
+        public void setAttackSpeed(float atkSpeed)
+        {
+            shootCD = 10 / atkSpeed;
+        }
 
         public void Shoot(List<SpaceObject> newObjects)
         {
             if (currentShootCD == 0)
             {
-                Console.WriteLine("muzzle:" + muzzleOffsetDistance + " , " + muzzleOffsetDirection);
-                Console.WriteLine("pos:" + posOffsetDistance + " , " + posOffsetDirection);
                 Bullet newShot = new Bullet(parent.pos.X + (float)Math.Cos(parent.rotation + muzzleOffsetDirection) * muzzleOffsetDistance, 
                        parent.pos.Y + (float)Math.Sin(parent.rotation + muzzleOffsetDirection) * muzzleOffsetDistance, 
                        parent.rotation + ((float)spreadRNG.NextDouble()-.5f)*spread, 
                        bulletTexture, 
+                       parent.getFaction());
+
+                newObjects.Add(newShot);
+                currentShootCD = shootCD;
+            }
+        }
+
+        public void ShootDirection(List<SpaceObject> newObjects, float direction)
+        {
+            if (currentShootCD == 0)
+            {
+                Bullet newShot = new Bullet(parent.pos.X + (float)Math.Cos(parent.rotation + muzzleOffsetDirection) * muzzleOffsetDistance,
+                       parent.pos.Y + (float)Math.Sin(parent.rotation + muzzleOffsetDirection) * muzzleOffsetDistance,
+                       direction + ((float)spreadRNG.NextDouble() - .5f) * spread,
+                       bulletTexture,
                        parent.getFaction());
 
                 newObjects.Add(newShot);
