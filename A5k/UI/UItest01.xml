@@ -1,0 +1,20 @@
+<Grid xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:local="clr-namespace:A5k">
+
+	<StackPanel Orientation="Vertical" HorizontalAlignment="Left" VerticalAlignment="Center"
+	x:Class="MyGrid">
+	  <Border Width="100" Height ="100" Margin="5" BorderBrush="Black" BorderThickness="1">
+		<Button Content="Left" HorizontalAlignment="Left" VerticalAlignment="Center" Click="OnButton1Click"/>
+	  </Border>
+	  <Border Width="100" Height ="100" Margin="5" BorderBrush="Black" BorderThickness="1">
+		<Button Content="Center" HorizontalAlignment="Center" VerticalAlignment="Center" Click="OnButton2Click"/>
+	  </Border>
+	  <Border Width="100" Height ="100" Margin="5" BorderBrush="Black" BorderThickness="1">
+		<Button Content="Right" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+	  </Border>
+	  <Border Width="100" Height ="100" Margin="5" BorderBrush="Black" BorderThickness="1">
+		<Button Content="Stretch" HorizontalAlignment="Stretch" VerticalAlignment="Center"/>
+	  </Border>
+	</StackPanel>
+</Grid>

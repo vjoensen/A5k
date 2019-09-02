@@ -67,8 +67,11 @@
     <Compile Include="SpaceObject.cs" />
     <Compile Include="SpriteDrawer.cs" />
     <Compile Include="Texture2D.cs" />
+    <Compile Include="UI\DelegateCommand.cs" />
     <Compile Include="UI\Inventory.cs" />
+    <Compile Include="UI\MyGrid.cs" />
     <Compile Include="UI\UIElement.cs" />
+    <Compile Include="UI\UppercasConverter.cs" />
     <Compile Include="View.cs" />
     <Compile Include="Weapons\Weapon.cs" />
   </ItemGroup>
@@ -85,6 +88,8 @@
     <Content Include="Shaders\5Frag\fragmentShaderShield.c" />
     <Content Include="Shaders\5Frag\fragmentShaderTex.c" />
     <Content Include="Shaders\5Frag\fragmentShader.c" />
+    <Content Include="UI\UItest1.xaml" />
+    <Content Include="UI\Reflections.xaml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="SpriteSheets\" />

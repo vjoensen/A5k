@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-//using Noesis;
+
 //using Noesis;
 using OpenTK;
 using OpenTK.Graphics;
@@ -48,9 +48,11 @@ namespace A5k
         private bool inventoryOpen = false;
 
 
+        private double globalTime = 0;
         //Noesis UI
         private Noesis.View nView;
         private Noesis.Renderer renderer;
+        Noesis.Grid xaml;
 
         public MainWindow()
             : base(640, // initial width
@@ -73,14 +75,16 @@ namespace A5k
 
         }
 
-        protected override void OnResize(EventArgs e)
+        protected override void OnResize(System.EventArgs e)
         {
             GL.Viewport(0, 0, Width, Height);
             view.viewSize.X = Width;
             view.viewSize.Y = Height;
+            nView.SetSize(this.Width, this.Height);
+
         }
 
-        protected override void OnLoad(EventArgs e)
+        protected override void OnLoad(System.EventArgs e)
         {
 
             Noesis.GUI.Init();
@@ -93,35 +97,26 @@ namespace A5k
 
 
             // Data loading
-            Noesis.Grid xaml = (Noesis.Grid)Noesis.GUI.ParseXaml(@"
-                <Grid xmlns=""http://schemas.microsoft.com/winfx/2006/xaml/presentation"">
-                    <Grid.Background>
-                        <LinearGradientBrush StartPoint=""0,0"" EndPoint=""0,1"">
-                            <GradientStop Offset=""0"" Color=""#FF123F61""/>
-                            <GradientStop Offset=""0.6"" Color=""#FF0E4B79""/>
-                            <GradientStop Offset=""0.7"" Color=""#FF106097""/>
-                        </LinearGradientBrush>
-                    </Grid.Background>
-                    <Viewbox>
-                        <StackPanel Margin=""50"">
-                            <Button Content=""Hello World!"" Margin=""0,30,0,0""/>
-                            <Rectangle Height=""5"" Margin=""-10,20,-10,0"">
-                                <Rectangle.Fill>
-                                    <RadialGradientBrush>
-                                        <GradientStop Offset=""0"" Color=""#40000000""/>
-                                        <GradientStop Offset=""1"" Color=""#00000000""/>
-                                    </RadialGradientBrush>
-                                </Rectangle.Fill>
-                            </Rectangle>
-                        </StackPanel>
-                    </Viewbox>
-                </Grid>");
-            // get content
-            var content = (Noesis.Grid)Noesis.GUI.LoadXaml("Reflections.xaml");
+            Noesis.GUI.SetXamlProvider(new NoesisApp.LocalXamlProvider("."));
+            //Noesis.Grid xaml = (Noesis.Grid)Noesis.GUI.LoadXaml("UI\\UItest0.xaml");
+            xaml = new Noesis.Grid();
+            Noesis.GUI.LoadComponent(xaml, "UI\\UItest03.xaml");
+            //MyGrid xaml = new MyGrid();
 
+
+
+            
+            Noesis.Button button = (Noesis.Button)xaml.FindName("button");
+            button.Click += (object sender, Noesis.RoutedEventArgs args) =>
+            {
+                System.Console.WriteLine("Button was clicked");
+            };
+
+            
             // create view
             nView = Noesis.GUI.CreateView(xaml);
-            nView.SetSize(640, 480);
+            
+            nView.SetSize(this.Width, this.Height);
             // get OpenGL rendering device
             Noesis.RenderDevice device = new Noesis.RenderDeviceGL();
 
@@ -129,10 +124,9 @@ namespace A5k
             renderer = nView.Renderer;
             renderer.Init(device);
 
+            System.Console.WriteLine(button.IsInitialized);
 
-
-
-            nView.Update(0.001); // Ensures view is updated before first render call (avoids crash)
+            //nView.Update(0.001); // Ensures view is updated before first render call (avoids crash)
 
 
             CursorVisible = true;
@@ -181,6 +175,8 @@ namespace A5k
             Debug.WriteLine("Exit called");
 
             base.Exit();
+            //renderer.Shutdown();
+            //Noesis.GUI.Shutdown();
         }
 
 
@@ -188,11 +184,14 @@ namespace A5k
         {
             HandleKeyboard();
             Input.mousePosition = mousePos;
+            ;
+            //mousePos.X = this.PointToClient(new Point(Mouse.GetCursorState().X, Mouse.GetCursorState().Y)).X-this.Width/2;
+            //mousePos.Y = -this.PointToClient(new Point(Mouse.GetCursorState().X, Mouse.GetCursorState().Y)).Y+this.Height/2;
 
-            mousePos.X = this.PointToClient(new Point(Mouse.GetCursorState().X, Mouse.GetCursorState().Y)).X-this.Width/2;
-            mousePos.Y = -this.PointToClient(new Point(Mouse.GetCursorState().X, Mouse.GetCursorState().Y)).Y+this.Height/2;
+            mousePos.X = Noesis.Mouse.GetPosition(xaml).X - this.Width / 2;
+            mousePos.Y = -Noesis.Mouse.GetPosition(xaml).Y + this.Height / 2;
 
-            for(int i = spaceObjects.Count-1; i>=0; i--)
+            for (int i = spaceObjects.Count-1; i>=0; i--)
             {
                 if (spaceObjects[i].isDead())
                 {
@@ -211,6 +210,8 @@ namespace A5k
             CheckCollisions();
             spaceObjects.AddRange(newSO);
             view.Update();
+            globalTime += e.Time;
+            nView.Update(globalTime);
         }
 
         
@@ -280,13 +281,9 @@ namespace A5k
             GL.ClearColor(backColor);
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
-            renderer.UpdateRenderTree();
 
-            if (renderer.NeedsOffscreen())
-                renderer.RenderOffscreen();
-
-            renderer.Render();
-
+            GL.Enable(EnableCap.Blend);
+            GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
             //SpriteDrawer.Draw(texture, Vector2.Zero, Vector2.One, Color.Azure, new Vector2(((float)texture.Width)/2, ((float)texture.Height)/2));
             if (inventoryOpen)
             {
@@ -302,33 +299,42 @@ namespace A5k
                 SpriteDrawer.DrawCursor(cursorTexture, mousePos, Vector2.One, Color.Azure, new Vector2(((float)cursorTexture.Width) / 2, ((float)cursorTexture.Height) / 2));
             }
 
+            renderer.UpdateRenderTree();
 
-            /*
-            GL.Enable(EnableCap.DepthTest);
-            GL.DepthFunc(DepthFunction.Lequal);
-            GL.ClearDepth(1.0f);
-            GL.DepthMask(true);
-            GL.Disable(EnableCap.CullFace);
-            //GL.Disable(EnableCap.Alp AlphaTest);
-            GL.Disable(EnableCap.StencilTest);
-            GL.Disable(EnableCap.Blend);
-            GL.Disable(EnableCap.ScissorTest);
+            if (renderer.NeedsOffscreen()) renderer.RenderOffscreen();
 
-            GL.UseProgram(0);
-            GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
-            GL.Viewport(0, 0, Width, Height);
-            GL.ColorMask(true, true, true, true);
-
-            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-
-            */
-
-
-            /*
-            m_Canvas.RenderCanvas();
-            */
+            renderer.Render();
 
             SwapBuffers();
+        }
+
+        
+        protected override void OnMouseMove(MouseMoveEventArgs e)
+        {
+            nView.MouseMove(e.X, e.Y);
+        }
+
+        protected override void OnMouseDown(MouseButtonEventArgs e)
+        {
+            nView.MouseButtonDown(e.X, e.Y, TranslateButton(e.Button));
+        }
+
+        protected override void OnMouseUp(MouseButtonEventArgs e)
+        {
+            nView.MouseButtonUp(e.X, e.Y, TranslateButton(e.Button));
+        }
+        
+
+
+        private static Noesis.MouseButton TranslateButton(MouseButton button)
+        {
+            switch (button)
+            {
+                case MouseButton.Left: return Noesis.MouseButton.Left;
+                case MouseButton.Right: return Noesis.MouseButton.Right;
+                case MouseButton.Middle: return Noesis.MouseButton.Middle;
+                default: return Noesis.MouseButton.XButton1;
+            }
         }
     }
 
