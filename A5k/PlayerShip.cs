@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using A5k.Weapons;
 using OpenTK;
 
 
@@ -48,7 +49,8 @@ namespace A5k
             radius = Math.Max(shipTexture.Height, shipTexture.Width)/2;
 
             weapons = new List<Weapon>();
-            weapons.Add(new Weapon(this, -20,15 , 0, SpriteDrawer.LoadTexture("PNG\\Parts\\gun09.png", false,false), SpriteDrawer.LoadTexture("PNG\\Lasers\\laserBlue01.png",true, false),2,20));
+            //weapons.Add(new Weapon(this, -20,15 , 0, SpriteDrawer.LoadTexture("PNG\\Parts\\gun09.png", false,false), SpriteDrawer.LoadTexture("PNG\\Lasers\\laserBlue01.png",true, false),2,20));
+            weapons.Add(new Shotgun(this, -20, 15, 0, SpriteDrawer.LoadTexture("PNG\\Parts\\gun04.png", false, false), SpriteDrawer.LoadTexture("PNG\\Lasers\\laserGreen13.png", true, false), 2, 20));
 
         }
 

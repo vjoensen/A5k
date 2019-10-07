@@ -27,13 +27,11 @@ namespace A5k
     public sealed class MainWindow : GameWindow
     {
         private readonly string _title;
-        //private int _program;
-        //private int _program2;
-        //private int _vertexArray;
+
         private double _time;
         private Texture2D texture;
         private Texture2D cursorTexture;
-        //uint VBO, VAO, EBO;
+
         Vector2 mousePos;
         View view;
         
@@ -103,10 +101,13 @@ namespace A5k
             Noesis.GUI.LoadComponent(xaml, "UI\\UItest03.xaml");
             //MyGrid xaml = new MyGrid();
 
+            Noesis.StackPanel sp = (Noesis.StackPanel)xaml.FindName("BottomMenu");
+            sp.DataContext = new ViewModel();
 
 
-            
+
             Noesis.Button button = (Noesis.Button)xaml.FindName("button");
+            
             button.Click += (object sender, Noesis.RoutedEventArgs args) =>
             {
                 System.Console.WriteLine("Button was clicked");
@@ -123,13 +124,14 @@ namespace A5k
             // init renderer as OpenGL
             renderer = nView.Renderer;
             renderer.Init(device);
+            
 
-            System.Console.WriteLine(button.IsInitialized);
-
-            //nView.Update(0.001); // Ensures view is updated before first render call (avoids crash)
+            nView.Update(0.001); // Ensures view is updated before first render call (avoids crash)
 
 
             CursorVisible = true;
+
+
 
             mousePos = new Vector2(this.PointToClient(new Point(Mouse.GetCursorState().X, Mouse.GetCursorState().Y)).X, this.PointToClient(new Point(Mouse.GetCursorState().X, Mouse.GetCursorState().Y)).Y);
             Input.mousePosition = mousePos;
@@ -139,8 +141,7 @@ namespace A5k
 
 
             GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
-            //
-            //spritebatch = new Spritebatch(view);
+
 
             spritedrawer = new SpriteDrawer(view);
             cursorTexture = SpriteDrawer.LoadTexture("PNG\\crosshair010.png", true, false);
@@ -280,7 +281,9 @@ namespace A5k
             backColor.B = 0.3f;
             GL.ClearColor(backColor);
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-
+            GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
+            GL.ClearStencil(0);
+            
 
             GL.Enable(EnableCap.Blend);
             GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
@@ -308,7 +311,8 @@ namespace A5k
             SwapBuffers();
         }
 
-        
+
+
         protected override void OnMouseMove(MouseMoveEventArgs e)
         {
             nView.MouseMove(e.X, e.Y);

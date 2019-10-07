@@ -67,12 +67,15 @@
     <Compile Include="SpaceObject.cs" />
     <Compile Include="SpriteDrawer.cs" />
     <Compile Include="Texture2D.cs" />
+    <Compile Include="UI\ConsoloeWriteCommand.cs" />
     <Compile Include="UI\DelegateCommand.cs" />
     <Compile Include="UI\Inventory.cs" />
     <Compile Include="UI\MyGrid.cs" />
     <Compile Include="UI\UIElement.cs" />
     <Compile Include="UI\UppercasConverter.cs" />
+    <Compile Include="UI\ViewModel.cs" />
     <Compile Include="View.cs" />
+    <Compile Include="Weapons\Shotgun.cs" />
     <Compile Include="Weapons\Weapon.cs" />
   </ItemGroup>
   <ItemGroup>

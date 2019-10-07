@@ -11,19 +11,18 @@ namespace A5k
     class Weapon
     {
 
-        private float rotaOffset;
-        private float posOffsetDistance;
-        private float posOffsetDirection;
-
-        private float muzzleOffsetDistance;
-        private float muzzleOffsetDirection;
-        private SpaceObject parent;
-        private Texture2D texture;
-        private Texture2D bulletTexture;
-        private float shootCD = 10;
-        private float currentShootCD = 10;
-        private float spread;
-        Random spreadRNG;
+        protected float rotaOffset;
+        protected float posOffsetDistance;
+        protected float posOffsetDirection;
+        protected float muzzleOffsetDistance;
+        protected float muzzleOffsetDirection;
+        protected SpaceObject parent;
+        protected Texture2D texture;
+        protected Texture2D bulletTexture;
+        protected float shootCD = 10;
+        protected float currentShootCD = 10;
+        protected float spread;
+        protected Random spreadRNG;
 
         public Weapon(SpaceObject parent, float spawnPosX, float spawnPosY, float spawnRotation, Texture2D weaponTexture, Texture2D bulletTexture, float muzzleOffsetX , float muzzleOffsetY )
         {
@@ -49,7 +48,7 @@ namespace A5k
             shootCD = 10 / atkSpeed;
         }
 
-        public void Shoot(List<SpaceObject> newObjects)
+        public virtual void Shoot(List<SpaceObject> newObjects)
         {
             if (currentShootCD == 0)
             {

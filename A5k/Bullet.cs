@@ -16,10 +16,10 @@ namespace A5k
 
         private float xVel, yVel;
 
-        private float speed = 5;
+        private float speed = 8;
 
         private Texture2D texture;
-        
+        private float textureScale = .5f;
         float duration = 120;
         
 
@@ -49,7 +49,14 @@ namespace A5k
 
         override public void Draw()
         {
-            SpriteDrawer.Draw(texture, pos, Vector2.One, Color.Azure, new Vector2(((float)texture.Width) / 2, ((float)texture.Height) / 2), rotation - (float)Math.PI / 2);
+            SpriteDrawer.Draw(texture, pos, Vector2.One*textureScale, Color.Azure, new Vector2(((float)texture.Width) / 2, ((float)texture.Height) / 2), rotation - (float)Math.PI / 2);
+        }
+
+        public void setSpeed(float newSpeed)
+        {
+            xVel = newSpeed * xVel / speed;
+            yVel = newSpeed * yVel / speed;
+            speed = newSpeed;
         }
 
         public override void Collide(SpaceObject collider)
