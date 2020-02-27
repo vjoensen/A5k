@@ -155,6 +155,8 @@ namespace A5k
             player = new PlayerShip(0, 0, 0, texture, SpriteDrawer.LoadTexture("PNG\\Lasers\\laserBlue01.png", true, false),  view);
             enemyAI = new AI(spaceObjects, player);
             Ship enemy1 = new Ship(200, 200, 0, SpriteDrawer.LoadTexture("PNG\\ufoBlue.png", true, false));
+            player.setTarget(enemy1);
+
 
             enemyAI.takeControl(enemy1);
             spaceObjects.Add(enemy1);

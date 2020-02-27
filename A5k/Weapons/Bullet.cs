@@ -7,12 +7,11 @@ using System.Threading.Tasks;
 using OpenTK;
 
 
-namespace A5k
+namespace A5k.Weapons
 {
     class Bullet:SpaceObject
     {
         //private float posX, posY;
-
 
         private float xVel, yVel;
 

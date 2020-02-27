@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace A5k
+namespace A5k.Weapons
 {
     class Weapon
     {

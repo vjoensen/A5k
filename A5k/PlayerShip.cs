@@ -20,14 +20,16 @@ namespace A5k
         private float maxSpeed;
         private float acceleration;
         private Texture2D texture;
-        
 
+        private SpaceObject target;
 
         //private int shootCD = 10;
         //private int currentShootCD = 10;
         Texture2D bulletTexture;
 
         List<Weapon> weapons;
+
+        MissileLauncher weapon1;
 
         View view;
 
@@ -50,8 +52,15 @@ namespace A5k
 
             weapons = new List<Weapon>();
             //weapons.Add(new Weapon(this, -20,15 , 0, SpriteDrawer.LoadTexture("PNG\\Parts\\gun09.png", false,false), SpriteDrawer.LoadTexture("PNG\\Lasers\\laserBlue01.png",true, false),2,20));
-            weapons.Add(new Shotgun(this, -20, 15, 0, SpriteDrawer.LoadTexture("PNG\\Parts\\gun04.png", false, false), SpriteDrawer.LoadTexture("PNG\\Lasers\\laserGreen13.png", true, false), 2, 20));
+            //weapons.Add(new Shotgun(this, -20, 15, 0, SpriteDrawer.LoadTexture("PNG\\Parts\\gun04.png", false, false), SpriteDrawer.LoadTexture("PNG\\Lasers\\laserGreen13.png", true, false), 2, 20));
+            //weapons.Add(new MissileLauncher(this, -20, 15, 0, SpriteDrawer.LoadTexture("PNG\\Parts\\gun07.png", false, false), SpriteDrawer.LoadTexture("PNG\\Sprites X2\\Missiles\\spaceMissiles_013.png", true, false), 2, 5));
+            weapon1 = new MissileLauncher(this, -20, 15, 0, SpriteDrawer.LoadTexture("PNG\\Parts\\gun07.png", false, false), SpriteDrawer.LoadTexture("PNG\\Sprites X2\\Missiles\\spaceMissiles_013.png", true, false), 2, 5);
 
+        }
+
+        public void setTarget(SpaceObject newTarget)
+        {
+            this.target = newTarget;
         }
 
         override public void Update(List<SpaceObject> newObjects)
@@ -94,12 +103,16 @@ namespace A5k
 
             if (Input.KeyDown(OpenTK.Input.Key.Space))
             {
+                weapon1.Shoot(newObjects);
 
                 foreach(Weapon wep in weapons)
                 {
                     wep.Shoot(newObjects);
                 }
             }
+            weapon1.setTarget(this.target);
+            weapon1.Update(newObjects);
+            
             foreach (Weapon wep in weapons)
             {
                 wep.Update(newObjects);
